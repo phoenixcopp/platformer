@@ -41,9 +41,42 @@ class Level:
       self.world_shift = 0
       player.speed = 7
 
+  def horizontal_movement_collision(self):
+    player = self.player.sprite
+    player.rect.x += player.direction.x * player.speed  #apply horz movement
+
+    # check through all sprite to see if collision
+    for sprite in self.tiles.sprites():
+      # if collision, determine what position player is moving to determine side of collision
+      if sprite.rect.colliderect(player.rect):
+        if player.direction.x < 0: # left col
+          player.rect.left = sprite.rect.right
+        elif player.direction.x > 0: # right col
+          player.rect.right = sprite.rect.left
+
+  def vertical_movement_collision(self):
+    player = self.player.sprite
+    player.apply_gravity()  #apply vert movement
+
+    # check through all sprite to see if collision
+    for sprite in self.tiles.sprites():
+      # if collision, determine what position player is moving to determine side of collision
+      if sprite.rect.colliderect(player.rect):
+        if player.direction.y > 0:  # top col
+          player.rect.bottom = sprite.rect.top
+          player.direction.y = 0  # cancel gravity
+        elif player.direction.y < 0:  #bottom col
+          player.rect.top = sprite.rect.bottom
+          player.direction.y = 0  # cancel jump (-y direction movement)
+
   def run(self):
+    #player
     self.tiles.update(self.world_shift)
     self.tiles.draw(self.display_surface)
-    self.player.update()
-    self.player.draw(self.display_surface)
     self.scroll_X()
+
+    #player
+    self.player.update()
+    self.horizontal_movement_collision()
+    self.vertical_movement_collision()
+    self.player.draw(self.display_surface)
